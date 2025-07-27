@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Secure Terminal</title>
+  <style>
+    body {
+      margin: 0;
+      background: black;
+      overflow: hidden;
+      color: #0f0;
+      font-family: monospace;
+    }
+
+    canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 0;
+    }
+
+    .centered {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 1;
+      text-align: center;
+      width: 90%;
+      max-width: 500px;
+    }
+
+    .glitch {
+      font-size: 28px;
+      animation: flicker 1.5s infinite alternate;
+      text-shadow: 0 0 8px #0f0;
+    }
+
+    @keyframes flicker {
+      0% { opacity: 0.8; }
+      50% { opacity: 1; transform: scale(1.01); }
+      100% { opacity: 0.5; }
+    }
+
+    .login-box {
+      margin-top: 20px;
+      padding: 15px;
+      border: 2px solid #0f0;
+      background: rgba(0, 0, 0, 0.5);
+      box-shadow: 0 0 10px #0f0;
+    }
+
+    input {
+      background: black;
+      border: 1px solid #0f0;
+      color: #0f0;
+      padding: 8px;
+      margin: 6px 0;
+      width: 90%;
+    }
+
+    .hack-output {
+      margin-top: 20px;
+      text-align: left;
+      font-size: 13px;
+      max-height: 200px;
+      overflow-y: auto;
+      padding: 10px;
+      background: rgba(0, 255, 0, 0.05);
+      border: 1px solid #0f0;
+      display: none;
+    }
+
+    button {
+      padding: 8px 16px;
+      margin-top: 10px;
+      background: black;
+      border: 1px solid #0f0;
+      color: #0f0;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #0f0;
+      color: black;
+    }
+
+    .alert {
+      color: red;
+      font-weight: bold;
+      margin-top: 15px;
+    }
+
+    #shutdown {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: black;
+      color: red;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+      font-weight: bold;
+      z-index: 999;
+      animation: flicker 0.3s infinite;
+    }
+  </style>
+</head>
+<body>
+
+<canvas id="matrix"></canvas>
+
+<div class="centered">
+  <div class="glitch">SECURE TERMINAL</div>
+  <div class="login-box">
+    <input type="text" id="username" placeholder="Username"><br>
+    <input type="password" id="password" placeholder="Password"><br>
+    <button onclick="startHack()">Access System</button>
+  </div>
+  <div class="hack-output" id="output"></div>
+</div>
+
+<div id="shutdown">🔴 SYSTEM FAILURE</div>
+
+<script>
+  // Matrix background
+  const canvas = document.getElementById("matrix");
+  const ctx = canvas.getContext("2d");
+  canvas.height = window.innerHeight;
+  canvas.width = window.innerWidth;
+
+  const letters = "01ΔΞΩΛΣ#&$%*".split("");
+  const fontSize = 16;
+  const columns = canvas.width / fontSize;
+  const drops = [];
+  for (let x = 0; x < columns; x++) drops[x] = 1;
+
+  function drawMatrix() {
+    ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = "#0f0";
+    ctx.font = fontSize + "px monospace";
+    for (let i = 0; i < drops.length; i++) {
+      const text = letters[Math.floor(Math.random() * letters.length)];
+      ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+      if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) drops[i] = 0;
+      drops[i]++;
+    }
+  }
+  setInterval(drawMatrix, 33);
+
+  // Auto-type animation for realism
+  window.onload = () => {
+    const user = document.getElementById("username");
+    const pass = document.getElementById("password");
+
+    const autoType = (el, text, delay = 100) => {
+      let i = 0;
+      const interval = setInterval(() => {
+        if (i < text.length) {
+          el.value += text[i++];
+        } else {
+          clearInterval(interval);
+        }
+      }, delay);
+    };
+
+    autoType(user, "admin", 120);
+    setTimeout(() => autoType(pass, "********", 80), 1500);
+  };
+
+  // Hacking sequence
+  const output = document.getElementById("output");
+
+  const hackLines = [
+    "[+] Connecting to proxy node...",
+    "[+] Routing through secure tunnel...",
+    "[✓] Tunnel established",
+    "[*] Deploying payload to target node...",
+    "[*] Brute-forcing authentication...",
+    "[✓] Credentials matched.",
+    "[*] Elevating privileges...",
+    "[✓] Root access granted.",
+    "[!] Wiping audit trails...",
+    "[✓] Logs erased.",
+    "<span class='alert'>🔴 INTRUSION DETECTED</span>",
+    "<span class='alert'>⚠️ LOCKING ALL SYSTEM CHANNELS...</span>"
+  ];
+
+  function startHack() {
+    const user = document.getElementById("username").value;
+    const pass = document.getElementById("password").value;
+
+    if (user && pass) {
+      output.style.display = "block";
+      output.innerHTML = "";
+      let i = 0;
+
+      const interval = setInterval(() => {
+        if (i < hackLines.length) {
+          output.innerHTML += hackLines[i] + "<br>";
+          output.scrollTop = output.scrollHeight;
+          i++;
+        } else {
+          clearInterval(interval);
+          setTimeout(triggerShutdown, 2000); // Shutdown effect
+        }
+      }, 700);
+    } else {
+      alert("Enter both username and password");
+    }
+  }
+
+  function triggerShutdown() {
+    document.getElementById("shutdown").style.display = "flex";
+    setTimeout(() => {
+      document.body.innerHTML = "<h1 style='color:red;text-align:center;margin-top:40vh;'>🛑 Connection Terminated</h1>";
+    }, 3000);
+  }
+</script>
+
+</body>
+</html>
